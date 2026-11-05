@@ -428,6 +428,14 @@ function buildCommentText(student, subject, bucket){
     .join(' ');
 }
 
+// Combines English (first) + Guided Discovery (last) for one bucket ("strengths" or "growth"),
+// regardless of the order the teacher actually selected the individual statements in.
+function buildCombinedText(student, bucket){
+  const englishText = buildCommentText(student, 'english', bucket);
+  const gdText = buildCommentText(student, 'gd', bucket);
+  return [englishText, gdText].filter(Boolean).join(' ');
+}
+
 function updatePreview(subject, bucket){
   const s = currentStudent();
   const text = buildCommentText(s, subject, bucket);
@@ -435,7 +443,7 @@ function updatePreview(subject, bucket){
   el.textContent = text || 'Select statements above…';
 }
 
-// ===================== FINAL POWERSCHOOL-READY PREVIEW (bottom panel) =====================
+// ===================== FINAL POWERSCHOOL-READY PREVIEW (bottom panel, combined) =====================
 function setSpacedBox(id, rawArray, student, skipSubstitution, emptyMsg){
   const el = document.getElementById(id);
   if(!el) return;
@@ -454,10 +462,13 @@ function renderFinalPreview(){
   const nameEl = document.getElementById('previewStudentName');
   if(nameEl) nameEl.textContent = s.name;
   setSpacedBox('ps-pastoral', s.pastoral.text.trim() ? [s.pastoral.text.trim()] : [], s, true, 'No comment written yet…');
-  setSpacedBox('ps-english-strengths', s.english.strengths.map(x=>x.raw), s, false);
-  setSpacedBox('ps-english-growth', s.english.growth.map(x=>x.raw), s, false);
-  setSpacedBox('ps-gd-strengths', s.gd.strengths.map(x=>x.raw), s, false);
-  setSpacedBox('ps-gd-growth', s.gd.growth.map(x=>x.raw), s, false);
+
+  // Combined boxes: English statements always first, Guided Discovery always last —
+  // built fresh every render, so order of selection never matters.
+  const combinedStrengths = [...s.english.strengths.map(x=>x.raw), ...s.gd.strengths.map(x=>x.raw)];
+  const combinedGrowth = [...s.english.growth.map(x=>x.raw), ...s.gd.growth.map(x=>x.raw)];
+  setSpacedBox('ps-strengths-combined', combinedStrengths, s, false, 'No strengths selected yet…');
+  setSpacedBox('ps-growth-combined', combinedGrowth, s, false, 'No growth statements selected yet…');
 }
 
 // ===================== COPY TO CLIPBOARD (handles both per-subject + final preview buttons) =====================
@@ -475,10 +486,8 @@ document.addEventListener('click', (e)=>{
   } else if(btn.dataset.copyRaw && s){
     const type = btn.dataset.copyRaw;
     if(type === 'pastoral') text = s.pastoral.text.trim();
-    else if(type === 'english-strengths') text = buildCommentText(s,'english','strengths');
-    else if(type === 'english-growth') text = buildCommentText(s,'english','growth');
-    else if(type === 'gd-strengths') text = buildCommentText(s,'gd','strengths');
-    else if(type === 'gd-growth') text = buildCommentText(s,'gd','growth');
+    else if(type === 'strengths-combined') text = buildCombinedText(s, 'strengths');
+    else if(type === 'growth-combined') text = buildCombinedText(s, 'growth');
   }
 
   if(!text){ toast('Nothing to copy yet.'); return; }
@@ -545,10 +554,19 @@ document.getElementById('exportWordBtn').addEventListener('click', ()=>{
   state.students.forEach(st=>{
     html += `<h1>${escapeHtml(st.name)} — Semester ${state.semester==='S1'?'1':'2'}</h1>`;
     html += sectionHtml('General Comment (Overall Performance — Pastoral)', st.pastoral.text.trim() ? [st.pastoral.text.trim()] : []);
-    html += sectionHtml('English — Area(s) of Strength', st.english.strengths.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)));
-    html += sectionHtml('English — Area(s) for Growth', st.english.growth.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)));
-    html += sectionHtml('Guided Discovery — Area(s) of Strength', st.gd.strengths.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)));
-    html += sectionHtml('Guided Discovery — Area(s) for Growth', st.gd.growth.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)));
+
+    // Combined boxes: English statements first, Guided Discovery statements last.
+    const combinedStrengths = [
+      ...st.english.strengths.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)),
+      ...st.gd.strengths.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun))
+    ];
+    const combinedGrowth = [
+      ...st.english.growth.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)),
+      ...st.gd.growth.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun))
+    ];
+
+    html += sectionHtml('Area(s) of Strength (English comments first, Guided Discovery comments last)', combinedStrengths);
+    html += sectionHtml('Area(s) for Growth (English comments first, Guided Discovery comments last)', combinedGrowth);
     html += `<hr>`;
   });
   html += `</body></html>`;
