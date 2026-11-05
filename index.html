@@ -141,11 +141,11 @@
         </div>
         <div class="preview-grid">
           <div class="preview-box">
-            <div class="preview-header"><h4>Strength comment (ready to paste)</h4><button class="btn-copy" data-copy-target="english-strength-preview">📋 Copy</button></div>
+            <div class="preview-header"><h4>English strengths (this subject only)</h4><button class="btn-copy" data-copy-target="english-strength-preview">📋 Copy</button></div>
             <div class="preview-text" id="english-strength-preview">Select statements above…</div>
           </div>
           <div class="preview-box">
-            <div class="preview-header"><h4>Growth comment (ready to paste)</h4><button class="btn-copy" data-copy-target="english-growth-preview">📋 Copy</button></div>
+            <div class="preview-header"><h4>English growth (this subject only)</h4><button class="btn-copy" data-copy-target="english-growth-preview">📋 Copy</button></div>
             <div class="preview-text" id="english-growth-preview">Select statements above…</div>
           </div>
         </div>
@@ -175,17 +175,17 @@
         </div>
         <div class="preview-grid">
           <div class="preview-box">
-            <div class="preview-header"><h4>Strength comment (ready to paste)</h4><button class="btn-copy" data-copy-target="gd-strength-preview">📋 Copy</button></div>
+            <div class="preview-header"><h4>Guided Discovery strengths (this subject only)</h4><button class="btn-copy" data-copy-target="gd-strength-preview">📋 Copy</button></div>
             <div class="preview-text" id="gd-strength-preview">Select statements above…</div>
           </div>
           <div class="preview-box">
-            <div class="preview-header"><h4>Growth comment (ready to paste)</h4><button class="btn-copy" data-copy-target="gd-growth-preview">📋 Copy</button></div>
+            <div class="preview-header"><h4>Guided Discovery growth (this subject only)</h4><button class="btn-copy" data-copy-target="gd-growth-preview">📋 Copy</button></div>
             <div class="preview-text" id="gd-growth-preview">Select statements above…</div>
           </div>
         </div>
       </div>
 
-      <!-- ===================== FINAL POWERSCHOOL PREVIEW (always visible, all subjects) ===================== -->
+      <!-- ===================== FINAL POWERSCHOOL PREVIEW (always visible, combined) ===================== -->
       <div class="ps-preview-card">
         <div class="ps-preview-header">
           <span>📋</span> Final PowerSchool-Ready Preview — <span id="previewStudentName">—</span>
@@ -198,30 +198,18 @@
           </div>
           <div class="ps-field-row">
             <div class="ps-field">
-              <label>English — Area(s) of Strength</label>
-              <div class="ps-box" id="ps-english-strengths"></div>
-              <button class="btn-copy" data-copy-raw="english-strengths">📋 Copy for PowerSchool</button>
+              <label>Area(s) of Strength <span class="ps-field-hint">(English comments first, Guided Discovery comments last)</span></label>
+              <div class="ps-box" id="ps-strengths-combined"></div>
+              <button class="btn-copy" data-copy-raw="strengths-combined">📋 Copy for PowerSchool</button>
             </div>
             <div class="ps-field">
-              <label>English — Area(s) for Growth</label>
-              <div class="ps-box" id="ps-english-growth"></div>
-              <button class="btn-copy" data-copy-raw="english-growth">📋 Copy for PowerSchool</button>
-            </div>
-          </div>
-          <div class="ps-field-row">
-            <div class="ps-field">
-              <label>Guided Discovery — Area(s) of Strength</label>
-              <div class="ps-box" id="ps-gd-strengths"></div>
-              <button class="btn-copy" data-copy-raw="gd-strengths">📋 Copy for PowerSchool</button>
-            </div>
-            <div class="ps-field">
-              <label>Guided Discovery — Area(s) for Growth</label>
-              <div class="ps-box" id="ps-gd-growth"></div>
-              <button class="btn-copy" data-copy-raw="gd-growth">📋 Copy for PowerSchool</button>
+              <label>Area(s) for Growth <span class="ps-field-hint">(English comments first, Guided Discovery comments last)</span></label>
+              <div class="ps-box" id="ps-growth-combined"></div>
+              <button class="btn-copy" data-copy-raw="growth-combined">📋 Copy for PowerSchool</button>
             </div>
           </div>
         </div>
-        <p class="ps-note">💡 Each statement is shown on its own line above so it's easy to proofread — but the <strong>Copy</strong> buttons automatically join everything with a single space (no line breaks), exactly as required when pasting into PowerSchool.</p>
+        <p class="ps-note">💡 Each statement is shown on its own line above so it's easy to proofread. English statements always appear first, and Guided Discovery statements always appear last — no matter which order you actually selected them in. The <strong>Copy</strong> buttons join everything with a single space (no line breaks), exactly as required for PowerSchool.</p>
       </div>
     </div>
   </section>
@@ -234,9 +222,9 @@
         <li>Add every student in your class on the <strong>Class Roster</strong> tab (legal first name + pronoun).</li>
         <li>Go to <strong>Comment Builder</strong>, pick a student, and build their Pastoral, English, and Guided Discovery comments by checking statements from the official bank.</li>
         <li>English and Guided Discovery statements are <strong>locked exactly as approved</strong> — you only choose which ones apply. The name and pronoun are substituted automatically.</li>
-        <li>Aim for <strong>3–4 strengths and 2–3 growth statements</strong> per subject (5–7 total). You'll see a warning (not a hard block) if you go outside that.</li>
-        <li>Scroll to the bottom of the Comment Builder to see the <strong>Final PowerSchool-Ready Preview</strong> — a one-stop summary of all 5 fields for the selected student, with a dedicated Copy button for each.</li>
-        <li>Use the <strong>⬇ Export All (Word)</strong> button at the top to download every student's comments in one neatly formatted document.</li>
+        <li>Aim for <strong>3–4 strengths and 2–3 growth statements combined across English + Guided Discovery</strong>. You'll see a warning (not a hard block) if a single subject goes outside 3–4 / 2–3.</li>
+        <li>Scroll to the bottom of the Comment Builder to see the <strong>Final PowerSchool-Ready Preview</strong> — 3 boxes: General Comment, a combined Area(s) of Strength, and a combined Area(s) for Growth. English statements always sit on top, Guided Discovery statements always sit at the bottom, regardless of the order you built them in.</li>
+        <li>Use the <strong>⬇ Export All (Word)</strong> button at the top to download every student's comments in one neatly formatted document, matching this same combined layout.</li>
       </ol>
     </div>
     <div class="panel">
