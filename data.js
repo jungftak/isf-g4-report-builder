@@ -338,7 +338,7 @@ const ISF_ENGLISH = [
     ]}
   ]},
 
-  { id:'eng-writingprocess', title:'Writing Process (Plan • Draft • Revise)', code:'Semester 2 only', semesters:['S2'], units:[
+  { id:'eng-writingprocess', title:'Writing Process (Plan • Draft • Revise)', code:'Semester 1 & 2', semesters:['S1','S2'], units:[
     { id:'main', name:'Writing Process', strengths:[
       {t:"X uses the writing template with clarity and detail, and (his/her) ideas are fully developed and consistently revisited as the drafting process progresses.", lvl:"H"},
       {t:"X reflects on (his/her) writing after completing a piece, recognizing what (he/she) did well and what (he/she) can improve.", lvl:"H"},
