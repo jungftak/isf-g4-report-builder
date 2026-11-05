@@ -187,6 +187,7 @@ function renderEditor(){
 
   updatePronounButtons();
   renderCommentPanel(state.currentSubject);
+  renderFinalPreview();
 }
 
 document.getElementById('studentSelect').addEventListener('change', (e)=>{
@@ -252,6 +253,7 @@ function renderPastoral(){
   renderVirtueExamples();
   document.getElementById('pastoralText').value = s.pastoral.text;
   updatePastoralCount();
+  renderFinalPreview();
 }
 document.getElementById('virtueGrid').addEventListener('click', (e)=>{
   const btn = e.target.closest('.virtue-card'); if(!btn) return;
@@ -278,11 +280,13 @@ document.getElementById('virtueExamples').addEventListener('click', (e)=>{
   ta.value = (ta.value.trim() ? ta.value.trim() + ' ' : '') + text;
   s.pastoral.text = ta.value; saveState();
   updatePastoralCount();
+  renderFinalPreview();
 });
 document.getElementById('pastoralText').addEventListener('input', (e)=>{
   const s = currentStudent(); if(!s) return;
   s.pastoral.text = e.target.value; saveState();
   updatePastoralCount();
+  renderFinalPreview();
 });
 function updatePastoralCount(){
   const text = document.getElementById('pastoralText').value.trim();
@@ -315,6 +319,7 @@ function renderBuilder(subject){
     document.getElementById(subject+'-level-filter').innerHTML='';
     document.getElementById(subject+'-strength-list').innerHTML='';
     document.getElementById(subject+'-growth-list').innerHTML='';
+    renderFinalPreview();
     return;
   }
   if(!standard.units.find(u=>u.id===vs.unitId)){ vs.unitId = standard.units[0]?.id; vs.level='ALL'; }
@@ -341,6 +346,7 @@ function renderBuilder(subject){
 
   renderStatementBucket(subject, standard, unit, 'strengths');
   renderStatementBucket(subject, standard, unit, 'growth');
+  renderFinalPreview();
 }
 
 function renderStatementBucket(subject, standard, unit, bucket){
@@ -429,14 +435,54 @@ function updatePreview(subject, bucket){
   el.textContent = text || 'Select statements above…';
 }
 
-// ===================== COPY TO CLIPBOARD =====================
+// ===================== FINAL POWERSCHOOL-READY PREVIEW (bottom panel) =====================
+function setSpacedBox(id, rawArray, student, skipSubstitution, emptyMsg){
+  const el = document.getElementById(id);
+  if(!el) return;
+  if(!rawArray.length){
+    el.innerHTML = `<p class="ps-empty">${emptyMsg || 'Nothing selected yet…'}</p>`;
+    return;
+  }
+  el.innerHTML = rawArray.map(raw => {
+    const text = skipSubstitution ? raw : applyNamePronoun(raw, student.name, student.pronoun);
+    return `<p>${escapeHtml(text)}</p>`;
+  }).join('');
+}
+
+function renderFinalPreview(){
+  const s = currentStudent(); if(!s) return;
+  const nameEl = document.getElementById('previewStudentName');
+  if(nameEl) nameEl.textContent = s.name;
+  setSpacedBox('ps-pastoral', s.pastoral.text.trim() ? [s.pastoral.text.trim()] : [], s, true, 'No comment written yet…');
+  setSpacedBox('ps-english-strengths', s.english.strengths.map(x=>x.raw), s, false);
+  setSpacedBox('ps-english-growth', s.english.growth.map(x=>x.raw), s, false);
+  setSpacedBox('ps-gd-strengths', s.gd.strengths.map(x=>x.raw), s, false);
+  setSpacedBox('ps-gd-growth', s.gd.growth.map(x=>x.raw), s, false);
+}
+
+// ===================== COPY TO CLIPBOARD (handles both per-subject + final preview buttons) =====================
 document.addEventListener('click', (e)=>{
   const btn = e.target.closest('.btn-copy'); if(!btn) return;
-  const targetId = btn.dataset.copyTarget;
-  const el = document.getElementById(targetId);
-  const text = (el.tagName === 'TEXTAREA') ? el.value : el.textContent;
-  if(!text || text.includes('Select statements above')){ toast('Nothing to copy yet.'); return; }
-  navigator.clipboard.writeText(text).then(()=> toast('Copied to clipboard!'));
+  const s = currentStudent();
+  let text = '';
+
+  if(btn.dataset.copyTarget){
+    const el = document.getElementById(btn.dataset.copyTarget);
+    if(el){
+      text = (el.tagName === 'TEXTAREA') ? el.value : el.textContent;
+      if(text && text.includes('Select statements above')) text = '';
+    }
+  } else if(btn.dataset.copyRaw && s){
+    const type = btn.dataset.copyRaw;
+    if(type === 'pastoral') text = s.pastoral.text.trim();
+    else if(type === 'english-strengths') text = buildCommentText(s,'english','strengths');
+    else if(type === 'english-growth') text = buildCommentText(s,'english','growth');
+    else if(type === 'gd-strengths') text = buildCommentText(s,'gd','strengths');
+    else if(type === 'gd-growth') text = buildCommentText(s,'gd','growth');
+  }
+
+  if(!text){ toast('Nothing to copy yet.'); return; }
+  navigator.clipboard.writeText(text).then(()=> toast('Copied — ready to paste into PowerSchool!'));
 });
 
 // ===================== DATA MENU: BACKUP / RESTORE / CLEAR =====================
@@ -473,22 +519,36 @@ document.getElementById('clearBtn').addEventListener('click', ()=>{
 });
 
 // ===================== EXPORT ALL TO WORD =====================
+function sectionHtml(title, items){
+  const inner = items.length
+    ? items.map(t=>`<p>${escapeHtml(t)}</p>`).join('')
+    : `<div class="box empty"><p>No comment entered yet.</p></div>`;
+  const boxed = items.length ? `<div class="box">${inner}</div>` : inner;
+  return `<h2>${escapeHtml(title)}</h2>${boxed}`;
+}
+
 document.getElementById('exportWordBtn').addEventListener('click', ()=>{
   if(!state.students.length){ toast('Add at least one student first.'); return; }
   let html = `<html><head><meta charset="utf-8"><style>
-    body{font-family:Calibri,Arial,sans-serif; color:#242230;}
-    h1{color:#7A1232; border-bottom:2px solid #C9A24B; padding-bottom:4px;}
-    h2{color:#1B2A4A; font-size:14px; margin-top:16px;}
-    p{font-size:12px; line-height:1.5;}
+    body{font-family:Calibri,Arial,sans-serif; color:#242230; font-size:12px;}
+    h1{color:#7A1232; border-bottom:3px solid #C9A24B; padding-bottom:6px; font-size:18px; margin-top:36px;}
+    h1:first-of-type{margin-top:0;}
+    h2{color:#1B2A4A; font-size:13px; margin:18px 0 6px; text-transform:uppercase; letter-spacing:.03em;}
+    .box{border:1px solid #D8D2C4; background:#FBF9F5; border-radius:6px; padding:10px 14px; margin-bottom:4px;}
+    .box p{margin:0 0 10px 0; line-height:1.5;}
+    .box p:last-child{margin-bottom:0;}
+    .box.empty{color:#8a8a8a; font-style:italic;}
+    .note{font-size:10.5px; color:#6B6B76; margin-bottom:30px; border-bottom:1px solid #ccc; padding-bottom:10px;}
     hr{margin:28px 0; border:none; border-top:1px solid #ccc;}
   </style></head><body>`;
+  html += `<p class="note">⚠️ When pasting into PowerSchool, each statement should be separated by a single space (not a line break) — this document shows statements on separate lines only to make proofreading easier. Use the 📋 Copy buttons in the app for PowerSchool-ready text.</p>`;
   state.students.forEach(st=>{
     html += `<h1>${escapeHtml(st.name)} — Semester ${state.semester==='S1'?'1':'2'}</h1>`;
-    html += `<h2>Overall Performance Comment (Pastoral)</h2><p>${escapeHtml(st.pastoral.text || '—')}</p>`;
-    html += `<h2>English — Areas of Strength</h2><p>${escapeHtml(buildCommentText(st,'english','strengths') || '—')}</p>`;
-    html += `<h2>English — Areas for Growth</h2><p>${escapeHtml(buildCommentText(st,'english','growth') || '—')}</p>`;
-    html += `<h2>Guided Discovery — Areas of Strength</h2><p>${escapeHtml(buildCommentText(st,'gd','strengths') || '—')}</p>`;
-    html += `<h2>Guided Discovery — Areas for Growth</h2><p>${escapeHtml(buildCommentText(st,'gd','growth') || '—')}</p>`;
+    html += sectionHtml('General Comment (Overall Performance — Pastoral)', st.pastoral.text.trim() ? [st.pastoral.text.trim()] : []);
+    html += sectionHtml('English — Area(s) of Strength', st.english.strengths.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)));
+    html += sectionHtml('English — Area(s) for Growth', st.english.growth.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)));
+    html += sectionHtml('Guided Discovery — Area(s) of Strength', st.gd.strengths.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)));
+    html += sectionHtml('Guided Discovery — Area(s) for Growth', st.gd.growth.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)));
     html += `<hr>`;
   });
   html += `</body></html>`;
