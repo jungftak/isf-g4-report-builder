@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISF Grade 4 Report Comment Builder</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-left">
+    <div class="logo-badge">ISF</div>
+    <div class="header-title">
+      <h1>Grade 4 Report Comment Builder</h1>
+      <p>Pastoral &middot; English &middot; Guided Discovery — word-for-word from the approved comment bank</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <label class="field-inline">
+      <span>Reporting period</span>
+      <select id="semesterSelect">
+        <option value="S1">Report 1 · Semester 1</option>
+        <option value="S2">Report 2 · Semester 2</option>
+      </select>
+    </label>
+    <button id="exportWordBtn" class="btn btn-gold" title="Download every student's comments as a Word file">⬇ Export All (Word)</button>
+    <div class="menu-wrap">
+      <button id="dataMenuBtn" class="btn btn-ghost">⚙ Data</button>
+      <div id="dataMenu" class="dropdown-menu hidden">
+        <button id="backupBtn">💾 Backup (download .json)</button>
+        <button id="restoreBtn">📂 Restore from .json</button>
+        <button id="clearBtn" class="danger">🗑 Clear all data</button>
+      </div>
+    </div>
+    <input type="file" id="restoreFile" accept="application/json" hidden>
+  </div>
+</header>
+
+<nav class="tabs" id="mainNav">
+  <button class="tab-btn active" data-view="roster">👥 Class Roster</button>
+  <button class="tab-btn" data-view="editor">✍️ Comment Builder</button>
+  <button class="tab-btn" data-view="help">❔ Help &amp; Notes</button>
+</nav>
+
+<main>
+
+  <!-- ===================== ROSTER VIEW ===================== -->
+  <section id="view-roster" class="view active">
+    <div class="panel">
+      <h2>Add a student</h2>
+      <form id="addStudentForm" class="add-student-form">
+        <input type="text" id="newStudentName" placeholder="Student's legal first name (e.g. Alex)" required>
+        <div class="pronoun-pick">
+          <label><input type="radio" name="newPronoun" value="he" checked> He / Him / His</label>
+          <label><input type="radio" name="newPronoun" value="she"> She / Her / Her</label>
+        </div>
+        <button type="submit" class="btn btn-maroon">+ Add student</button>
+      </form>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header-row">
+        <h2>Your class (<span id="studentCount">0</span>)</h2>
+        <input type="text" id="rosterSearch" placeholder="Search students...">
+      </div>
+      <div id="rosterList" class="roster-grid"></div>
+      <p class="empty-state" id="rosterEmpty">No students yet — add your first one above.</p>
+    </div>
+  </section>
+
+  <!-- ===================== EDITOR VIEW ===================== -->
+  <section id="view-editor" class="view">
+    <div class="editor-toolbar">
+      <label class="field-inline">
+        <span>Student</span>
+        <select id="studentSelect"></select>
+      </label>
+      <div class="pronoun-pill-group" id="pronounGroup">
+        <button class="pill-btn" data-p="he">He / Him / His</button>
+        <button class="pill-btn" data-p="she">She / Her / Her</button>
+      </div>
+      <div class="toolbar-spacer"></div>
+      <button id="prevStudentBtn" class="btn btn-ghost">&larr; Prev</button>
+      <button id="nextStudentBtn" class="btn btn-ghost">Next &rarr;</button>
+      <button id="removeStudentBtn" class="btn btn-danger-ghost">Remove student</button>
+    </div>
+
+    <p id="noStudentMsg" class="empty-state">Add a student in "Class Roster" first, then come back here.</p>
+
+    <div id="editorBody" class="hidden">
+      <div class="subtabs" id="commentTypeTabs">
+        <button class="subtab-btn active" data-type="pastoral">🌱 Pastoral (Overall Comment)</button>
+        <button class="subtab-btn" data-type="english">📖 English</button>
+        <button class="subtab-btn" data-type="gd">🔬 Guided Discovery</button>
+      </div>
+
+      <!-- PASTORAL PANEL -->
+      <div id="panel-pastoral" class="comment-panel active">
+        <div class="panel">
+          <h3>1. Pick a virtue for inspiration</h3>
+          <p class="hint">This box is a <strong>starting point</strong> only — unlike English/GD, you should personalise this in your own words. It must start with the student's name and link to at least one virtue.</p>
+          <div id="virtueGrid" class="virtue-grid"></div>
+        </div>
+        <div class="panel">
+          <h3>2. Example sentences for <span id="virtueSelectedName">—</span></h3>
+          <div id="virtueExamples" class="statement-list"></div>
+        </div>
+        <div class="panel">
+          <h3>3. Write / edit the Overall Performance Comment</h3>
+          <textarea id="pastoralText" rows="4" placeholder="Click an example above to insert it, then edit freely. Should be 2–3 sentences, start with the student's name, and reference a virtue."></textarea>
+          <div class="preview-footer">
+            <span id="pastoralCount" class="count-badge">0 sentences</span>
+            <button class="btn-copy" data-copy-target="pastoralText">📋 Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENGLISH PANEL -->
+      <div id="panel-english" class="comment-panel">
+        <div class="builder-grid">
+          <div class="builder-sidebar">
+            <h3>1. Focus area</h3>
+            <div id="english-standard-list" class="standard-list"></div>
+          </div>
+          <div class="builder-main">
+            <div id="english-unit-tabs" class="unit-tabs"></div>
+            <div id="english-level-filter" class="level-filter"></div>
+            <div class="statement-columns">
+              <div class="statement-col">
+                <h4>Areas of Strength <span class="count-badge" id="english-strength-count">0 / 4</span></h4>
+                <div id="english-strength-list" class="statement-list"></div>
+              </div>
+              <div class="statement-col">
+                <h4>Areas for Growth <span class="count-badge" id="english-growth-count">0 / 3</span></h4>
+                <div id="english-growth-list" class="statement-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-box">
+            <div class="preview-header"><h4>Strength comment (ready to paste)</h4><button class="btn-copy" data-copy-target="english-strength-preview">📋 Copy</button></div>
+            <div class="preview-text" id="english-strength-preview">Select statements above…</div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-header"><h4>Growth comment (ready to paste)</h4><button class="btn-copy" data-copy-target="english-growth-preview">📋 Copy</button></div>
+            <div class="preview-text" id="english-growth-preview">Select statements above…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GD PANEL -->
+      <div id="panel-gd" class="comment-panel">
+        <div class="builder-grid">
+          <div class="builder-sidebar">
+            <h3>1. Focus area</h3>
+            <div id="gd-standard-list" class="standard-list"></div>
+          </div>
+          <div class="builder-main">
+            <div id="gd-unit-tabs" class="unit-tabs"></div>
+            <div id="gd-level-filter" class="level-filter"></div>
+            <div class="statement-columns">
+              <div class="statement-col">
+                <h4>Areas of Strength <span class="count-badge" id="gd-strength-count">0 / 4</span></h4>
+                <div id="gd-strength-list" class="statement-list"></div>
+              </div>
+              <div class="statement-col">
+                <h4>Areas for Growth <span class="count-badge" id="gd-growth-count">0 / 3</span></h4>
+                <div id="gd-growth-list" class="statement-list"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-grid">
+          <div class="preview-box">
+            <div class="preview-header"><h4>Strength comment (ready to paste)</h4><button class="btn-copy" data-copy-target="gd-strength-preview">📋 Copy</button></div>
+            <div class="preview-text" id="gd-strength-preview">Select statements above…</div>
+          </div>
+          <div class="preview-box">
+            <div class="preview-header"><h4>Growth comment (ready to paste)</h4><button class="btn-copy" data-copy-target="gd-growth-preview">📋 Copy</button></div>
+            <div class="preview-text" id="gd-growth-preview">Select statements above…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== HELP VIEW ===================== -->
+  <section id="view-help" class="view">
+    <div class="panel">
+      <h2>How this tool works</h2>
+      <ol class="help-list">
+        <li>Add every student in your class on the <strong>Class Roster</strong> tab (legal first name + pronoun).</li>
+        <li>Go to <strong>Comment Builder</strong>, pick a student, and build their Pastoral, English, and Guided Discovery comments by checking statements from the official bank.</li>
+        <li>English and Guided Discovery statements are <strong>locked exactly as approved</strong> — you only choose which ones apply. The name and pronoun are substituted automatically.</li>
+        <li>Aim for <strong>3–4 strengths and 2–3 growth statements</strong> per subject (5–7 total). You'll see a warning (not a hard block) if you go outside that.</li>
+        <li>Use the <strong>📋 Copy</strong> button on each box to paste directly into the matching PowerSchool field, or use <strong>Export All (Word)</strong> at the top to download every student's comments in one document.</li>
+      </ol>
+    </div>
+    <div class="panel">
+      <h2>⚠️ Where is my data stored?</h2>
+      <p>Everything you type is saved <strong>only in this browser, on this computer</strong> (nothing is sent to a server, and other teachers cannot see your students even if they open the same website on their own device). This means:</p>
+      <ul class="help-list">
+        <li>If you clear your browser history/cache, your work could be lost — use <strong>⚙ Data &rarr; Backup</strong> regularly to download a safety copy.</li>
+        <li>If you switch computers, use <strong>Backup</strong> on the old one and <strong>Restore</strong> on the new one to carry your work over.</li>
+        <li>Do not use private/incognito windows — data won't be saved after you close the window.</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h2>Reporting standards reference</h2>
+      <p class="hint">This tool currently covers <strong>Grade 4 only</strong>: Pastoral/Overall comments, English (Reading, Writing, Speaking &amp; Listening, Grammar), and Guided Discovery — built from the 2025-26 CONFIRMED Reporting Standards comment bank.</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="app-footer">ISF Grade 4 Report Comment Builder · Internal teacher tool · Data stays on your device</footer>
+<div id="toast" class="toast hidden"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
