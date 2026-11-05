@@ -160,12 +160,16 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 .badge-band{background:var(--info-bg); color:var(--info);}
 .badge-tag{background:var(--gold-light); color:var(--maroon-dark);}
 .badge-any{background:var(--border); color:var(--muted);}
+.badge-G2-3{background:#E9E4F8;color:#6A49C4;}
+.badge-G4{background:var(--info-bg);color:var(--info);}
+.badge-G5{background:var(--warn-bg);color:var(--warn);}
+.badge-G6-7{background:#DDF3E6;color:var(--success);}
 
 .count-badge{font-size:11px; font-weight:800; padding:3px 9px; border-radius:12px; background:var(--border); color:var(--muted);}
 .count-badge.ok{background:var(--success-bg); color:var(--success);}
 .count-badge.warn{background:var(--warn-bg); color:var(--warn);}
 
-/* ---------- Preview boxes ---------- */
+/* ---------- Preview boxes (per-subject) ---------- */
 .preview-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px;}
 @media (max-width:900px){.preview-grid{grid-template-columns:1fr;}}
 .preview-box{background:var(--navy); border-radius:var(--radius); padding:16px; color:#fff;}
@@ -184,6 +188,25 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 #pastoralText{width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); font-size:14px; font-family:inherit; resize:vertical;}
 .preview-footer{display:flex; justify-content:space-between; align-items:center; margin-top:10px;}
 
+/* ---------- Final PowerSchool-style preview (NEW) ---------- */
+.ps-preview-card{background:#fff; border:2px solid var(--gold); border-radius:var(--radius); margin-top:26px; box-shadow:var(--shadow-lg); overflow:hidden;}
+.ps-preview-header{background:linear-gradient(135deg,var(--navy),#101b33); color:#fff; padding:12px 20px; font-weight:800; font-size:14px; display:flex; align-items:center; gap:8px;}
+.ps-preview-header span:first-child{font-size:16px;}
+#previewStudentName{color:var(--gold-light);}
+.ps-preview-body{padding:18px 20px;}
+.ps-field{margin-bottom:18px;}
+.ps-field:last-child{margin-bottom:0;}
+.ps-field-row{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;}
+.ps-field-row:last-child{margin-bottom:0;}
+@media (max-width:800px){.ps-field-row{grid-template-columns:1fr;}}
+.ps-field label{display:block; font-size:12px; font-weight:800; color:var(--maroon-dark); text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px;}
+.ps-field-hint{color:var(--muted); font-weight:500; text-transform:none; font-size:11px;}
+.ps-box{border:1px solid var(--border); background:var(--bg); border-radius:8px; padding:12px 14px; margin-bottom:8px; min-height:30px;}
+.ps-box p{margin:0 0 10px 0; font-size:13px; line-height:1.55; color:var(--ink);}
+.ps-box p:last-child{margin-bottom:0;}
+.ps-empty{color:var(--muted); font-style:italic; margin:0;}
+.ps-note{font-size:11.5px; color:var(--muted); padding:0 20px 16px; margin:0;}
+
 /* ---------- Help list ---------- */
 .help-list{line-height:1.7; padding-left:20px;}
 
@@ -192,8 +215,3 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 .toast.hidden{display:none;}
 
 .app-footer{text-align:center; padding:18px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); background:#fff;}
-/* GD grade-band badge colours (low -> high) */
-.badge-G2-3{background:#E9E4F8;color:#6A49C4;}
-.badge-G4{background:var(--info-bg);color:var(--info);}
-.badge-G5{background:var(--warn-bg);color:var(--warn);}
-.badge-G6-7{background:#DDF3E6;color:var(--success);}
