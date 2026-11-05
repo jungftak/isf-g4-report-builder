@@ -1,16 +1,23 @@
-/* ============ ISF THEME VARIABLES — edit these to match exact brand colours later ============ */
+/* ============ ISF THEME VARIABLES — matches ISF Academy's navy + multi-accent brand palette ============
+   Edit these values any time to fine-tune the exact shades — nothing else in this file needs to change. */
 :root{
-  --maroon:#7A1232;
-  --maroon-dark:#550C22;
-  --maroon-light:#A33A57;
-  --gold:#C9A24B;
-  --gold-light:#F1E4C0;
-  --navy:#1B2A4A;
-  --ink:#242230;
-  --muted:#6B6B76;
-  --bg:#F6F4F1;
+  --navy:#132A52;         /* primary brand colour — header, buttons, headings */
+  --navy-dark:#0B1B38;    /* darker navy — hover states, gradients */
+  --navy-light:#2C4A7C;   /* lighter navy — reserved for subtle accents */
+  --orange:#F5821F;       /* primary accent/CTA colour */
+  --orange-dark:#D96D0F;
+  --orange-light:#FDEEE0;
+  --sky:#1A7FAD;          /* English subject accent */
+  --sky-light:#E8F6FB;
+  --purple:#6A47AE;       /* Guided Discovery subject accent */
+  --purple-light:#F0EBFA;
+  --green:#4F8A28;        /* Pastoral subject accent */
+  --green-light:#EFF8E8;
+  --ink:#1D2433;
+  --muted:#667085;
+  --bg:#F5F6FA;
   --card:#FFFFFF;
-  --border:#E7E2DA;
+  --border:#E3E7EF;
   --success:#2E7D5B;
   --success-bg:#E6F3EC;
   --warn:#B9770E;
@@ -20,8 +27,8 @@
   --info:#2F6FA8;
   --info-bg:#E8F1F8;
   --radius:12px;
-  --shadow:0 2px 10px rgba(36,34,48,0.07), 0 1px 2px rgba(36,34,48,0.06);
-  --shadow-lg:0 10px 30px rgba(36,34,48,0.14);
+  --shadow:0 2px 10px rgba(19,42,82,0.08), 0 1px 2px rgba(19,42,82,0.06);
+  --shadow-lg:0 10px 30px rgba(19,42,82,0.16);
 }
 
 *{box-sizing:border-box;}
@@ -32,39 +39,46 @@ body{
   color:var(--ink);
   min-height:100vh;
 }
-h1,h2,h3,h4{margin:0 0 6px 0; color:var(--maroon-dark);}
+h1,h2,h3,h4{margin:0 0 6px 0; color:var(--navy-dark);}
 h1{font-size:20px;} h2{font-size:18px;} h3{font-size:15px; color:var(--navy);} h4{font-size:13px; color:var(--navy); text-transform:uppercase; letter-spacing:.03em;}
 p{line-height:1.5;}
 .hidden{display:none !important;}
 
 /* ---------- Header ---------- */
 .app-header{
-  background:linear-gradient(135deg,var(--maroon) 0%, var(--maroon-dark) 100%);
+  background:linear-gradient(135deg,var(--navy) 0%, var(--navy-dark) 100%);
   color:#fff; padding:14px 24px; display:flex; align-items:center; justify-content:space-between;
-  flex-wrap:wrap; gap:12px; border-bottom:4px solid var(--gold);
+  flex-wrap:wrap; gap:12px; border-bottom:4px solid var(--orange);
 }
 .header-left{display:flex; align-items:center; gap:14px;}
 .logo-badge{
-  width:44px;height:44px;border-radius:50%; background:var(--gold); color:var(--maroon-dark);
+  width:44px;height:44px;border-radius:50%; background:var(--orange); color:var(--navy-dark);
   display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; letter-spacing:.02em;
   box-shadow:0 0 0 3px rgba(255,255,255,.25);
 }
 .header-title h1{color:#fff; margin:0; font-size:19px;}
-.header-title p{color:var(--gold-light); margin:2px 0 0; font-size:12.5px;}
+.header-title p{color:var(--orange-light); margin:2px 0 0; font-size:12.5px;}
 .header-right{display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
-.field-inline{display:flex; flex-direction:column; font-size:11px; color:var(--gold-light); gap:3px;}
-.field-inline select, .field-inline input{
+
+/* .field-inline is reused in TWO different backgrounds (dark header vs white toolbar),
+   so colour rules below are deliberately scoped to each context — this is what fixes
+   the "invisible student name" bug. */
+.field-inline{display:flex; flex-direction:column; font-size:11px; gap:3px;}
+.app-header .field-inline{color:var(--orange-light);}
+.editor-toolbar .field-inline{color:var(--muted);}
+
+.app-header .field-inline select, .app-header .field-inline input{
   padding:7px 10px; border-radius:8px; border:1px solid rgba(255,255,255,.35); background:rgba(255,255,255,.12);
   color:#fff; font-size:13px;
 }
-.field-inline select option{color:#000;}
+.app-header .field-inline select option{color:#000;}
 
 /* ---------- Buttons ---------- */
 .btn{border:none; border-radius:8px; padding:9px 14px; font-size:13px; font-weight:600; cursor:pointer; transition:.15s; white-space:nowrap;}
-.btn-maroon{background:var(--maroon); color:#fff;}
-.btn-maroon:hover{background:var(--maroon-dark);}
-.btn-gold{background:var(--gold); color:var(--maroon-dark);}
-.btn-gold:hover{background:#dab85e;}
+.btn-maroon{background:var(--navy); color:#fff;}
+.btn-maroon:hover{background:var(--navy-dark);}
+.btn-gold{background:var(--orange); color:var(--navy-dark);}
+.btn-gold:hover{background:var(--orange-dark); color:#fff;}
 .btn-ghost{background:rgba(255,255,255,.14); color:#fff; border:1px solid rgba(255,255,255,.4);}
 .btn-ghost:hover{background:rgba(255,255,255,.26);}
 .btn-danger-ghost{background:transparent; color:var(--danger); border:1px solid var(--danger);}
@@ -85,7 +99,7 @@ p{line-height:1.5;}
   border-bottom:3px solid transparent; border-radius:8px 8px 0 0;
 }
 .tab-btn:hover{background:var(--bg);}
-.tab-btn.active{color:var(--maroon); border-bottom-color:var(--maroon);}
+.tab-btn.active{color:var(--navy); border-bottom-color:var(--navy);}
 
 main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 .view{display:none;} .view.active{display:block;}
@@ -93,7 +107,7 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 /* ---------- Panels / Cards ---------- */
 .panel{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px 22px; margin-bottom:20px; border:1px solid var(--border);}
 .panel-header-row{display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;}
-.hint{font-size:12.5px; color:var(--muted); background:var(--gold-light); padding:8px 12px; border-radius:8px; border-left:3px solid var(--gold); margin:8px 0 14px;}
+.hint{font-size:12.5px; color:var(--muted); background:var(--orange-light); padding:8px 12px; border-radius:8px; border-left:3px solid var(--orange); margin:8px 0 14px;}
 .empty-state{color:var(--muted); font-style:italic; padding:16px 0; text-align:center;}
 
 /* ---------- Roster ---------- */
@@ -119,12 +133,17 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 .pronoun-pill-group{display:flex; gap:6px;}
 .pill-btn{border:1px solid var(--border); background:#fff; padding:7px 13px; border-radius:20px; font-size:12.5px; cursor:pointer; font-weight:600; color:var(--muted);}
 .pill-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
-#studentSelect{padding:8px 10px; border-radius:8px; border:1px solid var(--border); font-size:14px; min-width:180px;}
 
-/* ---------- Subtabs (Pastoral / English / GD) ---------- */
+/* Explicit colour + background fixes the "invisible student name" bug for good. */
+#studentSelect{padding:8px 10px; border-radius:8px; border:1px solid var(--border); font-size:14px; min-width:180px; color:var(--ink); background:#fff;}
+
+/* ---------- Subtabs (Pastoral / English / GD) — each gets its own accent colour ---------- */
 .subtabs{display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;}
 .subtab-btn{background:#fff; border:2px solid var(--border); padding:11px 18px; border-radius:30px; font-weight:700; font-size:13.5px; cursor:pointer; color:var(--muted);}
-.subtab-btn.active{border-color:var(--maroon); color:var(--maroon); background:var(--gold-light);}
+.subtab-btn.active{border-color:var(--navy); color:var(--navy); background:var(--bg);}
+.subtab-btn[data-type="pastoral"].active{border-color:var(--green); color:var(--green); background:var(--green-light);}
+.subtab-btn[data-type="english"].active{border-color:var(--sky); color:var(--sky); background:var(--sky-light);}
+.subtab-btn[data-type="gd"].active{border-color:var(--purple); color:var(--purple); background:var(--purple-light);}
 .comment-panel{display:none;} .comment-panel.active{display:block;}
 
 /* ---------- Builder layout ---------- */
@@ -133,24 +152,29 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 .standard-list{display:flex; flex-direction:column; gap:6px; margin-top:10px;}
 .standard-btn{text-align:left; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px 12px; cursor:pointer; font-size:12.8px; line-height:1.35; color:var(--ink);}
 .standard-btn small{display:block; color:var(--muted); font-size:10.5px; margin-top:3px;}
-.standard-btn.active{background:var(--maroon); color:#fff; border-color:var(--maroon);}
-.standard-btn.active small{color:var(--gold-light);}
+.standard-btn.active{background:var(--navy); color:#fff; border-color:var(--navy);}
+.standard-btn.active small{color:rgba(255,255,255,.75);}
+#panel-english .standard-btn.active{background:var(--sky); border-color:var(--sky);}
+#panel-gd .standard-btn.active{background:var(--purple); border-color:var(--purple);}
 
 .builder-main{background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow);}
 .unit-tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
 .unit-tab-btn{background:var(--info-bg); color:var(--info); border:1px solid transparent; padding:6px 12px; border-radius:16px; font-size:12px; font-weight:700; cursor:pointer;}
 .unit-tab-btn.active{background:var(--navy); color:#fff;}
+#panel-english .unit-tab-btn.active{background:var(--sky);}
+#panel-gd .unit-tab-btn.active{background:var(--purple);}
+
 .level-filter{display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; align-items:center;}
 .level-filter .lf-label{font-size:11.5px; color:var(--muted); margin-right:4px;}
 .level-pill{background:#fff; border:1px solid var(--border); padding:5px 12px; border-radius:16px; font-size:12px; cursor:pointer; font-weight:700;}
-.level-pill.active{background:var(--gold); border-color:var(--gold); color:var(--maroon-dark);}
+.level-pill.active{background:var(--orange); border-color:var(--orange); color:var(--navy-dark);}
 
 .statement-columns{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
 @media (max-width:900px){.builder-grid,.statement-columns{grid-template-columns:1fr;}}
 .statement-col h4{display:flex; align-items:center; justify-content:space-between;}
 .statement-list{display:flex; flex-direction:column; gap:8px; max-height:420px; overflow-y:auto; padding-right:4px; margin-top:8px;}
 .statement-row{display:flex; gap:10px; align-items:flex-start; border:1px solid var(--border); border-radius:8px; padding:9px 11px; cursor:pointer; background:#fff; font-size:13px; line-height:1.45;}
-.statement-row:hover{border-color:var(--gold); background:var(--gold-light);}
+.statement-row:hover{border-color:var(--orange); background:var(--orange-light);}
 .statement-row.checked{background:var(--success-bg); border-color:var(--success);}
 .statement-row input{margin-top:3px; flex-shrink:0;}
 .badge{display:inline-block; font-size:10px; font-weight:800; padding:2px 7px; border-radius:10px; margin-right:6px; vertical-align:middle;}
@@ -158,7 +182,7 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 .badge-M{background:var(--warn-bg); color:var(--warn);}
 .badge-L{background:#E9E4F8; color:#6A49C4;}
 .badge-band{background:var(--info-bg); color:var(--info);}
-.badge-tag{background:var(--gold-light); color:var(--maroon-dark);}
+.badge-tag{background:var(--orange-light); color:var(--navy-dark);}
 .badge-any{background:var(--border); color:var(--muted);}
 .badge-G2-3{background:#E9E4F8;color:#6A49C4;}
 .badge-G4{background:var(--info-bg);color:var(--info);}
@@ -169,39 +193,41 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 .count-badge.ok{background:var(--success-bg); color:var(--success);}
 .count-badge.warn{background:var(--warn-bg); color:var(--warn);}
 
-/* ---------- Preview boxes (per-subject) — fully selectable, statements shown as separate paragraphs ---------- */
+/* ---------- Preview boxes (per-subject) — tinted to match each subject's accent colour ---------- */
 .preview-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:18px;}
 @media (max-width:900px){.preview-grid{grid-template-columns:1fr;}}
 .preview-box{background:var(--navy); border-radius:var(--radius); padding:16px; color:#fff;}
+#panel-english .preview-box{background:var(--sky);}
+#panel-gd .preview-box{background:var(--purple);}
 .preview-header{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;}
-.preview-header h4{color:var(--gold-light); margin:0;}
+.preview-header h4{color:var(--orange-light); margin:0;}
 .preview-text{font-size:13.5px; line-height:1.6; min-height:60px; background:rgba(255,255,255,.08); border-radius:8px; padding:10px 12px;}
 .preview-text p{margin:0 0 14px 0;}
 .preview-text p:last-child{margin-bottom:0;}
-.btn-copy{background:var(--gold); color:var(--maroon-dark); border:none; padding:6px 12px; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;}
-.btn-copy:hover{background:#dab85e;}
+.btn-copy{background:var(--orange); color:var(--navy-dark); border:none; padding:6px 12px; border-radius:7px; font-size:11.5px; font-weight:800; cursor:pointer;}
+.btn-copy:hover{background:var(--orange-dark); color:#fff;}
 
-/* ---------- Pastoral virtue grid ---------- */
+/* ---------- Pastoral virtue grid — tinted green, matching the Pastoral subtab ---------- */
 .virtue-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:10px; margin-top:10px;}
 .virtue-card{border:2px solid var(--border); border-radius:10px; padding:12px; text-align:left; background:#fff; cursor:pointer;}
-.virtue-card b{display:block; color:var(--maroon); font-size:14px;}
+.virtue-card b{display:block; color:var(--navy); font-size:14px;}
 .virtue-card span{display:block; font-size:11px; color:var(--muted); margin-top:3px;}
-.virtue-card.active{border-color:var(--maroon); background:var(--gold-light);}
+.virtue-card.active{border-color:var(--green); background:var(--green-light);}
 #pastoralText{width:100%; padding:12px; border-radius:8px; border:1px solid var(--border); font-size:14px; font-family:inherit; resize:vertical;}
 .preview-footer{display:flex; justify-content:space-between; align-items:center; margin-top:10px;}
 
-/* ---------- Final PowerSchool-style preview (combined) — fully selectable, statements shown as separate paragraphs ---------- */
-.ps-preview-card{background:#fff; border:2px solid var(--gold); border-radius:var(--radius); margin-top:26px; box-shadow:var(--shadow-lg); overflow:hidden;}
-.ps-preview-header{background:linear-gradient(135deg,var(--navy),#101b33); color:#fff; padding:12px 20px; font-weight:800; font-size:14px; display:flex; align-items:center; gap:8px;}
+/* ---------- Final PowerSchool-style preview (combined) ---------- */
+.ps-preview-card{background:#fff; border:2px solid var(--orange); border-radius:var(--radius); margin-top:26px; box-shadow:var(--shadow-lg); overflow:hidden;}
+.ps-preview-header{background:linear-gradient(135deg,var(--navy),var(--navy-dark)); color:#fff; padding:12px 20px; font-weight:800; font-size:14px; display:flex; align-items:center; gap:8px;}
 .ps-preview-header span:first-child{font-size:16px;}
-#previewStudentName{color:var(--gold-light);}
+#previewStudentName{color:var(--orange-light);}
 .ps-preview-body{padding:18px 20px;}
 .ps-field{margin-bottom:18px;}
 .ps-field:last-child{margin-bottom:0;}
 .ps-field-row{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;}
 .ps-field-row:last-child{margin-bottom:0;}
 @media (max-width:800px){.ps-field-row{grid-template-columns:1fr;}}
-.ps-field label{display:block; font-size:12px; font-weight:800; color:var(--maroon-dark); text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px;}
+.ps-field label{display:block; font-size:12px; font-weight:800; color:var(--navy-dark); text-transform:uppercase; letter-spacing:.03em; margin-bottom:6px;}
 .ps-field-hint{color:var(--muted); font-weight:500; text-transform:none; font-size:11px;}
 .ps-box{border:1px solid var(--border); background:var(--bg); border-radius:8px; padding:12px 14px; margin-bottom:8px; min-height:30px;}
 .ps-box p{margin:0 0 14px 0; font-size:13px; line-height:1.55; color:var(--ink);}
