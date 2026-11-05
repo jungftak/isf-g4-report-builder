@@ -192,3 +192,8 @@ main{max-width:1280px; margin:0 auto; padding:22px 24px 60px;}
 .toast.hidden{display:none;}
 
 .app-footer{text-align:center; padding:18px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); background:#fff;}
+/* GD grade-band badge colours (low -> high) */
+.badge-G2-3{background:#E9E4F8;color:#6A49C4;}
+.badge-G4{background:var(--info-bg);color:var(--info);}
+.badge-G5{background:var(--warn-bg);color:var(--warn);}
+.badge-G6-7{background:#DDF3E6;color:var(--success);}
