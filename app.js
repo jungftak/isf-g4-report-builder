@@ -18,6 +18,14 @@ function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); 
 
 function uid(){ return 'stu_' + Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
 
+// ===================== TEXT CLEANING =====================
+// Collapses stray internal whitespace/newlines WITHIN a single statement and trims
+// its ends. This does NOT control spacing BETWEEN statements — that's handled by the
+// copy functions below, which always match manual mouse-selection behaviour.
+function cleanText(str){
+  return String(str || '').replace(/\s+/g, ' ').trim();
+}
+
 // ===================== PRONOUN HELPERS =====================
 const PRONOUNS = {
   he:  { subj:"he",  obj:"him", poss:"his", reflexive:"himself" },
@@ -83,6 +91,78 @@ function toast(msg){
   el.classList.remove('hidden');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(()=> el.classList.add('hidden'), 2200);
+}
+
+// ===================== CLIPBOARD HELPERS =====================
+// Last-resort fallback for very old browsers.
+function legacyCopyPlain(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  try{
+    document.execCommand('copy');
+    toast('Copied — ready to paste into PowerSchool!');
+  }catch(err){
+    toast('Could not copy automatically — please select the text and copy manually.');
+  }
+  document.body.removeChild(ta);
+}
+
+// For plain <textarea> fields (e.g. the Pastoral tab's own Copy button) — copies
+// exactly what was typed. No statement-joining involved, so nothing to match here.
+function copyPlainTextSimple(text){
+  if(!text){ toast('Nothing to copy yet.'); return; }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text)
+      .then(()=> toast('Copied — ready to paste into PowerSchool!'))
+      .catch(()=> legacyCopyPlain(text));
+  } else {
+    legacyCopyPlain(text);
+  }
+}
+
+// For result boxes listing multiple statements as separate paragraphs — this selects
+// the box's actual content and lets the BROWSER copy it, exactly as if a teacher had
+// click-dragged over it with their mouse. This guarantees the Copy button and manual
+// selection always produce identical spacing (blank line between each statement).
+function copyBoxLikeManualSelection(boxEl){
+  const paragraphs = Array.from(boxEl.querySelectorAll('p')).filter(p => !p.classList.contains('ps-empty'));
+  if(!paragraphs.length){ toast('Nothing to copy yet.'); return; }
+
+  try{
+    const range = document.createRange();
+    range.selectNodeContents(boxEl);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    const ok = document.execCommand('copy');
+    selection.removeAllRanges();
+    if(ok){ toast('Copied — ready to paste into PowerSchool!'); return; }
+  }catch(err){ /* fall through to backup method below */ }
+
+  // Backup method for browsers that don't support the selection trick above —
+  // manually rebuilds the same blank-line spacing.
+  const plain = paragraphs.map(p => p.textContent.trim()).filter(Boolean).join('\n\n');
+  if(navigator.clipboard && window.ClipboardItem){
+    try{
+      const html = paragraphs.map(p => `<p>${p.innerHTML}</p>`).join('');
+      const item = new ClipboardItem({
+        'text/plain': new Blob([plain], {type:'text/plain'}),
+        'text/html': new Blob([html], {type:'text/html'})
+      });
+      navigator.clipboard.write([item]).then(()=> toast('Copied — ready to paste into PowerSchool!'));
+      return;
+    }catch(err){ /* fall through */ }
+  }
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(plain).then(()=> toast('Copied — ready to paste into PowerSchool!'));
+    return;
+  }
+  legacyCopyPlain(plain);
 }
 
 // ===================== NAVIGATION =====================
@@ -422,25 +502,17 @@ function updateCountBadge(subject, bucket){
   el.className = 'count-badge ' + (count>=min && count<=max ? 'ok' : 'warn');
 }
 
-function buildCommentText(student, subject, bucket){
-  return student[subject][bucket]
-    .map(x => applyNamePronoun(x.raw, student.name, student.pronoun))
-    .join(' ');
-}
-
-// Combines English (first) + Guided Discovery (last) for one bucket ("strengths" or "growth"),
-// regardless of the order the teacher actually selected the individual statements in.
-function buildCombinedText(student, bucket){
-  const englishText = buildCommentText(student, 'english', bucket);
-  const gdText = buildCommentText(student, 'gd', bucket);
-  return [englishText, gdText].filter(Boolean).join(' ');
-}
-
+// Small per-subject preview box, now rendered as separate <p> per statement so it
+// behaves identically to the combined boxes below (consistent spacing everywhere).
 function updatePreview(subject, bucket){
   const s = currentStudent();
-  const text = buildCommentText(s, subject, bucket);
+  const items = s[subject][bucket].map(x => cleanText(applyNamePronoun(x.raw, s.name, s.pronoun)));
   const el = document.getElementById(`${subject}-${bucket==='strengths'?'strength':'growth'}-preview`);
-  el.textContent = text || 'Select statements above…';
+  if(!items.length){
+    el.innerHTML = `<p class="ps-empty">Select statements above…</p>`;
+    return;
+  }
+  el.innerHTML = items.map(t => `<p>${escapeHtml(t)}</p>`).join('');
 }
 
 // ===================== FINAL POWERSCHOOL-READY PREVIEW (bottom panel, combined) =====================
@@ -452,7 +524,7 @@ function setSpacedBox(id, rawArray, student, skipSubstitution, emptyMsg){
     return;
   }
   el.innerHTML = rawArray.map(raw => {
-    const text = skipSubstitution ? raw : applyNamePronoun(raw, student.name, student.pronoun);
+    const text = skipSubstitution ? cleanText(raw) : cleanText(applyNamePronoun(raw, student.name, student.pronoun));
     return `<p>${escapeHtml(text)}</p>`;
   }).join('');
 }
@@ -471,27 +543,17 @@ function renderFinalPreview(){
   setSpacedBox('ps-growth-combined', combinedGrowth, s, false, 'No growth statements selected yet…');
 }
 
-// ===================== COPY TO CLIPBOARD (handles both per-subject + final preview buttons) =====================
+// ===================== COPY BUTTON CLICK HANDLER (unified) =====================
 document.addEventListener('click', (e)=>{
   const btn = e.target.closest('.btn-copy'); if(!btn) return;
-  const s = currentStudent();
-  let text = '';
+  const el = document.getElementById(btn.dataset.copyTarget);
+  if(!el){ toast('Nothing to copy yet.'); return; }
 
-  if(btn.dataset.copyTarget){
-    const el = document.getElementById(btn.dataset.copyTarget);
-    if(el){
-      text = (el.tagName === 'TEXTAREA') ? el.value : el.textContent;
-      if(text && text.includes('Select statements above')) text = '';
-    }
-  } else if(btn.dataset.copyRaw && s){
-    const type = btn.dataset.copyRaw;
-    if(type === 'pastoral') text = s.pastoral.text.trim();
-    else if(type === 'strengths-combined') text = buildCombinedText(s, 'strengths');
-    else if(type === 'growth-combined') text = buildCombinedText(s, 'growth');
+  if(el.tagName === 'TEXTAREA'){
+    copyPlainTextSimple(el.value.trim());
+    return;
   }
-
-  if(!text){ toast('Nothing to copy yet.'); return; }
-  navigator.clipboard.writeText(text).then(()=> toast('Copied — ready to paste into PowerSchool!'));
+  copyBoxLikeManualSelection(el);
 });
 
 // ===================== DATA MENU: BACKUP / RESTORE / CLEAR =====================
@@ -528,12 +590,14 @@ document.getElementById('clearBtn').addEventListener('click', ()=>{
 });
 
 // ===================== EXPORT ALL TO WORD =====================
+// Each statement becomes its own paragraph with spacing below it — matching exactly
+// what's shown on the website.
 function sectionHtml(title, items){
-  const inner = items.length
-    ? items.map(t=>`<p>${escapeHtml(t)}</p>`).join('')
-    : `<div class="box empty"><p>No comment entered yet.</p></div>`;
-  const boxed = items.length ? `<div class="box">${inner}</div>` : inner;
-  return `<h2>${escapeHtml(title)}</h2>${boxed}`;
+  if(!items.length){
+    return `<h2>${escapeHtml(title)}</h2><div class="box empty"><p>No comment entered yet.</p></div>`;
+  }
+  const inner = items.map(t => `<p>${escapeHtml(cleanText(t))}</p>`).join('');
+  return `<h2>${escapeHtml(title)}</h2><div class="box">${inner}</div>`;
 }
 
 document.getElementById('exportWordBtn').addEventListener('click', ()=>{
@@ -543,19 +607,18 @@ document.getElementById('exportWordBtn').addEventListener('click', ()=>{
     h1{color:#7A1232; border-bottom:3px solid #C9A24B; padding-bottom:6px; font-size:18px; margin-top:36px;}
     h1:first-of-type{margin-top:0;}
     h2{color:#1B2A4A; font-size:13px; margin:18px 0 6px; text-transform:uppercase; letter-spacing:.03em;}
-    .box{border:1px solid #D8D2C4; background:#FBF9F5; border-radius:6px; padding:10px 14px; margin-bottom:4px;}
-    .box p{margin:0 0 10px 0; line-height:1.5;}
+    .box{border:1px solid #D8D2C4; background:#FBF9F5; border-radius:6px; padding:12px 16px; margin-bottom:4px;}
+    .box p{margin:0 0 14px 0; line-height:1.5;}
     .box p:last-child{margin-bottom:0;}
     .box.empty{color:#8a8a8a; font-style:italic;}
-    .note{font-size:10.5px; color:#6B6B76; margin-bottom:30px; border-bottom:1px solid #ccc; padding-bottom:10px;}
+    .tip{border:1px solid #2F6FA8; background:#E8F1F8; color:#1B2A4A; padding:12px 16px; border-radius:6px; margin-bottom:28px; font-size:11.5px; line-height:1.6;}
     hr{margin:28px 0; border:none; border-top:1px solid #ccc;}
   </style></head><body>`;
-  html += `<p class="note">⚠️ When pasting into PowerSchool, each statement should be separated by a single space (not a line break) — this document shows statements on separate lines only to make proofreading easier. Use the 📋 Copy buttons in the app for PowerSchool-ready text.</p>`;
+  html += `<div class="tip">💡 Each statement below appears as its own paragraph, matching the spacing used on the website. Copying multiple paragraphs from here and pasting into PowerSchool should preserve that same blank-line spacing — but for the most reliable result, use the 📋 Copy buttons on the website directly.</div>`;
   state.students.forEach(st=>{
     html += `<h1>${escapeHtml(st.name)} — Semester ${state.semester==='S1'?'1':'2'}</h1>`;
     html += sectionHtml('General Comment (Overall Performance — Pastoral)', st.pastoral.text.trim() ? [st.pastoral.text.trim()] : []);
 
-    // Combined boxes: English statements first, Guided Discovery statements last.
     const combinedStrengths = [
       ...st.english.strengths.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun)),
       ...st.gd.strengths.map(x=>applyNamePronoun(x.raw, st.name, st.pronoun))
